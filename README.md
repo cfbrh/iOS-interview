@@ -7,7 +7,7 @@
 # UI视图 
 ## UITableView
 1. 重用机制
-
+   cell = [tableView dequeueReusableCellWithIdentifier:identifier]
 2. 数据源同步
 
 ## 事件传递 视图响应 *****
