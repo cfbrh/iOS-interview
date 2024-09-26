@@ -27,17 +27,17 @@ Q3: 分类中都可以添加哪些内容？
 
 A：实例方法；类方法；协议；属性。（分类不能添加实例变量，通过关联对象才可以添加实例变量）
 
-
 from https://opensource.apple.com/source/objc4/objc4-680/runtime/objc-runtime-new.h
 
-
 struct category_t {
+
     const char *name;
     classref_t cls;
     struct method_list_t *instanceMethods;
     struct method_list_t *classMethods;
     struct protocol_list_t *protocols;
     struct property_list_t *instanceProperties;
+    
     method_list_t *methodsForMeta(bool isMeta) {
         if (isMeta) return classMethods;
         else return instanceMethods;
@@ -47,6 +47,103 @@ struct category_t {
         else return instanceProperties;
     }
 };
+
+
+Q4: 加载调用栈
+
+_objc_init -> map_2_images（镜像不是图片） -> map_images_nolock -> _read_images -> remethodizeClass
+
+Q5: 源码分析
+
+from https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html
+
+static void remethodizeClass(Class cls)
+
+{
+    category_list *cats;
+    bool isMeta;
+
+    runtimeLock.assertWriting();
+/* 我们只分析分类中实例方法添加的逻辑，因此在这里我们假设 isMeta == NO，代表实例方法（否则元类方法） */
+    isMeta = cls->isMetaClass();
+
+    // Re-methodizing: check for more categories
+    // 获取cls中未完成整合的所有分类
+    if ((cats = unattachedCategoriesForClass(cls, false/*not realizing*/))) {
+        if (PrintConnecting) {
+            _objc_inform("CLASS: attaching categories to class '%s' %s", 
+                         cls->nameForLogging(), isMeta ? "(meta)" : "");
+        }
+        
+        attachCategories(cls, cats, true /*flush caches*/);        
+        free(cats);
+    }
+}
+
+
+// Attach method lists and properties and protocols from categories to a class.
+// Assumes the categories in cats are all loaded and sorted by load order, 
+// oldest categories first.
+
+static void attachCategories(Class cls, category_list *cats, bool flush_caches)
+
+{
+    if (!cats) return;
+    
+    /* if (PrintReplacedMethods) printReplacements(cls, cats);*/
+
+    bool isMeta = cls->isMetaClass();
+
+    // fixme rearrange to remove these intermediate allocations
+    method_list_t **mlists = (method_list_t **) /*方法列表*/
+        malloc(cats->count * sizeof(*mlists));
+    property_list_t **proplists = (property_list_t **) /*属性列表*/
+        malloc(cats->count * sizeof(*proplists));
+    protocol_list_t **protolists = (protocol_list_t **) /*协议列表*/
+        malloc(cats->count * sizeof(*protolists));
+
+    // Count backwards through cats to get newest categories first
+    int mcount = 0;
+    int propcount = 0;
+    int protocount = 0;
+    int i = cats->count;
+    bool fromBundle = NO;
+    while (i--) {
+        auto& entry = cats->list[i];
+
+        method_list_t *mlist = entry.cat->methodsForMeta(isMeta);
+        if (mlist) {
+            mlists[mcount++] = mlist;
+            fromBundle |= entry.hi->isBundle();
+        }
+
+        property_list_t *proplist = 
+            entry.cat->propertiesForMeta(isMeta, entry.hi);
+        if (proplist) {
+            proplists[propcount++] = proplist;
+        }
+
+        protocol_list_t *protolist = entry.cat->protocols;
+        if (protolist) {
+            protolists[protocount++] = protolist;
+        }
+    }
+
+    auto rw = cls->data();
+
+    prepareMethodLists(cls, mlists, mcount, NO, fromBundle);
+    rw->methods.attachLists(mlists, mcount);
+    free(mlists);
+    if (flush_caches  &&  mcount > 0) flushCaches(cls);
+
+    rw->properties.attachLists(proplists, propcount);
+    free(proplists);
+
+    rw->protocols.attachLists(protolists, protocount);
+    free(protolists);
+}
+
+
 
 
 # UI视图 
