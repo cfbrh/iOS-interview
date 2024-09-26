@@ -16,15 +16,20 @@
    
 ## 分类 Category
 Q1: 你用分类做了哪些事？
+
 A：声明私有方法，分解体积庞大的类文件，把Framework的私有方法公开。。。
 
 Q2: 分类的特点（和扩展的区别）
+
 A：运行时决议（在编写分类文件之后，并没有把分类中对应添加的内容附加到相应的宿主类上，而是在运行时通过runtime把分类中添加的内容添加在对应的宿主类上），这是和扩展最大的区别；可以为系统类添加分类
 
 Q3: 分类中都可以添加哪些内容？
+
 A：实例方法；类方法；协议；属性。（分类不能添加实例变量，通过关联对象才可以添加实例变量）
 
+
 from https://opensource.apple.com/source/objc4/objc4-680/runtime/objc-runtime-new.h
+
 
 struct category_t {
     const char *name;
@@ -33,18 +38,15 @@ struct category_t {
     struct method_list_t *classMethods;
     struct protocol_list_t *protocols;
     struct property_list_t *instanceProperties;
-
     method_list_t *methodsForMeta(bool isMeta) {
         if (isMeta) return classMethods;
         else return instanceMethods;
     }
-
     property_list_t *propertiesForMeta(bool isMeta) {
         if (isMeta) return nil; // classProperties;
         else return instanceProperties;
     }
 };
-
 
 
 # UI视图 
