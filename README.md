@@ -1,8 +1,8 @@
 # iOS-Interview for Junior Enginee
-精通OC
-精通UIKit等Cocoa Framework 自定义UI控件
-熟悉网络通信、常用的数据传输协议的理解 数据格式的解析 HTTP HTTPS 对称加密算法、非对称 数据格式json和xml如何解析
-主流开源框架的使用经验
+1. 精通OC
+2. 精通UIKit等Cocoa Framework 自定义UI控件
+3. 熟悉网络通信、常用的数据传输协议的理解 数据格式的解析 HTTP HTTPS 对称加密算法、非对称 数据格式json和xml如何解析
+4. 主流开源框架的使用经验
 
 # UI视图 
 ## UITableView
