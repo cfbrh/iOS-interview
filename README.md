@@ -8,9 +8,9 @@
 ## UITableView
 1. 重用机制
    
-cell = [tableView dequeueReusableCellWithIdentifier:identifier]
+   cell = [tableView dequeueReusableCellWithIdentifier:identifier]
    
-3. 数据源同步
+2. 数据源同步
 
 ## 事件传递 视图响应 *****
 ## 图像显示原理
