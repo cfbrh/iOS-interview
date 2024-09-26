@@ -6,10 +6,11 @@
 
 # UI视图 
 ## UITableView
-###1. 重用机制
-####cell = [tableView dequeueReusableCellWithIdentifier:identifier]
+1. 重用机制
    
-###3. 数据源同步
+cell = [tableView dequeueReusableCellWithIdentifier:identifier]
+   
+3. 数据源同步
 
 ## 事件传递 视图响应 *****
 ## 图像显示原理
