@@ -25,6 +25,7 @@ Q3: 分类中都可以添加哪些内容？
 A：实例方法；类方法；协议；属性。（分类不能添加实例变量，通过关联对象才可以添加实例变量）
 
 from https://opensource.apple.com/source/objc4/objc4-680/runtime/objc-runtime-new.h
+
 struct category_t {
     const char *name;
     classref_t cls;
